@@ -5,9 +5,9 @@ import game.oth.OthelloPlayer;
 
 import java.util.Random;
 
-public class RandomAgent extends OthelloPlayer {
+public class SamplePlayer extends OthelloPlayer {
 
-    public RandomAgent(int color, int[][] board, Random random) {
+    public SamplePlayer(int color, int[][] board, Random random) {
         super(color, board, random);
     }
 
