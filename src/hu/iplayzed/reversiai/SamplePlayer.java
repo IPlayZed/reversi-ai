@@ -5,6 +5,7 @@ import game.oth.OthelloPlayer;
 
 import java.util.Random;
 
+@SuppressWarnings("unused")
 public class SamplePlayer extends OthelloPlayer {
 
     public SamplePlayer(int color, int[][] board, Random random) {
