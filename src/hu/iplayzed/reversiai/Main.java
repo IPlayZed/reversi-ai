@@ -6,16 +6,34 @@ import java.util.concurrent.ThreadLocalRandom;
 
 // TODO: find out why my agent class is not reflected.
 public class Main {
-    private static void testEngine() throws Exception {
+
+    public static final String ENGINE_PACKAGE_PATH_OTHELLO_GAME = "game.oth.OthelloGame";
+    public static final String ENGINE_PACKAGE_PATH_GREEDY_PLAYER = "game.oth.players.GreedyPlayer";
+    public static final String ENGINE_FPS_EVALUATION_MODE = "0";
+    public static final String ENGINE_TABLE_SIZE = "10";
+    public static final String ENGINE_HOLE_GEN_ITERATIONS = "3";
+    public static final String ENGINE_MAX_ALLOWED_DECISION_TIMEOUT_MS = "2000";
+
+    @SuppressWarnings("SameParameterValue")
+    private static void testEngine(final String fpsEvaluationMode, final String player, final String tableSize,
+                                   final String holeGenIterations) throws Exception {
+
+        //Generate a seed for hole placement.
         String seed = Integer.toString(ThreadLocalRandom.current().nextInt());
-        String[] engineArgs = {"0", "game.oth.OthelloGame", seed, "10", "3", "2000", "game.oth.players.GreedyPlayer",
-                "hu.iplayzed.reversiai.SamplePlayer"};
+
+        //Create args for engine with some parameters predefined.
+        String[] engineArgs = {fpsEvaluationMode, ENGINE_PACKAGE_PATH_OTHELLO_GAME, seed, tableSize,
+                holeGenIterations, ENGINE_MAX_ALLOWED_DECISION_TIMEOUT_MS, ENGINE_PACKAGE_PATH_GREEDY_PLAYER, player};
+        //Start the game.
         Engine.main(engineArgs);
+
     }
 
     public static void main(String[] args) {
         try {
-            testEngine();
+            //testEngine(ENGINE_FPS_EVALUATION_MODE, ENGINE_PACKAGE_PATH_GREEDY_PLAYER, ENGINE_TABLE_SIZE,ENGINE_HOLE_GEN_ITERATIONS);
+            testEngine("1", ENGINE_PACKAGE_PATH_GREEDY_PLAYER, ENGINE_TABLE_SIZE,
+                    ENGINE_HOLE_GEN_ITERATIONS);
         } catch (Exception e) {
             e.printStackTrace();
         }
