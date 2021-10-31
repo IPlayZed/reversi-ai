@@ -5,12 +5,13 @@ import game.oth.OthelloGame;
 import game.oth.OthelloPlayer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 @SuppressWarnings("unused")
 public class MinimaxAlphaBeta extends OthelloPlayer {
 
-    private ArrayList<OthelloAction> othelloActions = new ArrayList<>();
+    private final ArrayList<OthelloAction> othelloActions = new ArrayList<>();
 
     /**
      * Specifies the class of a player, that is represented by the specified color
@@ -35,9 +36,20 @@ public class MinimaxAlphaBeta extends OthelloPlayer {
         return 1 - color;
     }
 
+    private boolean checkActionValidity(OthelloAction currentOthelloAction) {
+        return OthelloGame.isValid(board, currentOthelloAction.i, currentOthelloAction.j, color);
+    }
+
     @Override
     public OthelloAction getAction(OthelloAction prevAction, long[] remainingTimes) {
         if (prevAction != null) OthelloGame.setAction(board, prevAction.i, prevAction.j, updateColor());
+        Collections.shuffle(othelloActions, random);
+        OthelloAction othelloAction;
+        for (OthelloAction action : othelloActions) {
+            if (checkActionValidity(action)) {
+
+            }
+        }
         return null;
     }
 }
