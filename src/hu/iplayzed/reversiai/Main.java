@@ -13,6 +13,8 @@ public class Main {
     public static final String ENGINE_HOLE_GEN_ITERATIONS = "3";
     public static final String ENGINE_MAX_ALLOWED_DECISION_TIMEOUT_MS = "2000";
 
+    public static final String AGENT = "hu.iplayzed.reversiai.agents.MinimaxAlphaBetaDepthLimitedAgent";
+
     @SuppressWarnings("SameParameterValue")
     private static void testEngine(final String fpsEvaluationMode, final String player, final String tableSize,
                                    final String holeGenIterations) throws Exception {
@@ -30,8 +32,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            testEngine("1", ENGINE_PACKAGE_PATH_GREEDY_PLAYER, ENGINE_TABLE_SIZE,
-                    ENGINE_HOLE_GEN_ITERATIONS);
+            testEngine("3", AGENT, ENGINE_TABLE_SIZE, ENGINE_HOLE_GEN_ITERATIONS);
         } catch (Exception e) {
             e.printStackTrace();
         }

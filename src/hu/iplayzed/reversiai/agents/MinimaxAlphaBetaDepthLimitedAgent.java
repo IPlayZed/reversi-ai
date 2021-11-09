@@ -34,13 +34,13 @@ public class MinimaxAlphaBetaDepthLimitedAgent extends OthelloPlayer {
         applyPreviousAction(prevAction);
 
         OthelloAction bestAction = null;
-        float bestHeuristicValue = -Float.MAX_VALUE;
+        float bestHeuristicValue = Integer.MIN_VALUE;
 
         for (OthelloAction action : boardActions) {
             if (isValid(board, action.i, action.j, color)) {
-                int[][] rootNode = getChildNode(board, action, color);
-                float val = minMaxAlphaBetaLimitedPruning(rootNode, STARTING_DEPTH, -Float.MAX_VALUE, Float.MAX_VALUE,
-                        action, getEnemyColor());
+                int[][] childNode = getChildNode(board, action, color);
+                float val = minMaxAlphaBetaLimitedPruning(childNode, STARTING_DEPTH, Integer.MIN_VALUE,
+                        Integer.MAX_VALUE, action, getEnemyColor());
                 if (val > bestHeuristicValue) {
                     bestAction = action;
                     bestHeuristicValue = val;
@@ -57,14 +57,14 @@ public class MinimaxAlphaBetaDepthLimitedAgent extends OthelloPlayer {
     }
 
     private float minMaxAlphaBetaLimitedPruning(int[][] node, int currentDepth, float alpha, float beta,
-                                                OthelloAction action, int color) {
+                                                @SuppressWarnings("unused") OthelloAction action, int color) {
         if (currentDepth == MAX_DEPTH || getPossibleActions(node, color).size() == NO_MORE_CHILDREN) {
-            return getHeuristicValue();
+            return random.nextInt(); // test if it runs at all
         }
 
         ArrayList<OthelloAction> possibleActions = getPossibleActions(node, color);
         if (isMaximizing(color)) {
-            float max = Float.MAX_VALUE;
+            float max = Integer.MIN_VALUE;
             for (OthelloAction possibleAction : possibleActions) {
                 int[][] childNode = getChildNode(node, possibleAction, color);
                 max = max(max, minMaxAlphaBetaLimitedPruning(childNode, currentDepth + 1, alpha, beta,
@@ -74,7 +74,7 @@ public class MinimaxAlphaBetaDepthLimitedAgent extends OthelloPlayer {
             }
             return max;
         } else {
-            float min = -Float.MAX_VALUE;
+            float min = Integer.MAX_VALUE;
             for (OthelloAction possibleAction : possibleActions) {
                 int[][] childNode = getChildNode(node, possibleAction, color);
                 min = min(min, minMaxAlphaBetaLimitedPruning(childNode, currentDepth + 1, alpha, beta,
@@ -101,13 +101,13 @@ public class MinimaxAlphaBetaDepthLimitedAgent extends OthelloPlayer {
     }
 
     private ArrayList<OthelloAction> getPossibleActions(int[][] node, int nodeColor) {
-        ArrayList<OthelloAction> possibleAction = new ArrayList<>();
+        ArrayList<OthelloAction> possibleActions = new ArrayList<>();
         for (int i = 0; i < node.length; i++) {
             for (int j = 0; j < node[0].length; j++) {
-                if (isValid(node, i, j, nodeColor)) possibleAction.add(new OthelloAction(i, j));
+                if (isValid(node, i, j, nodeColor)) possibleActions.add(new OthelloAction(i, j));
             }
         }
-        return possibleAction;
+        return possibleActions;
     }
 
     // TODO
