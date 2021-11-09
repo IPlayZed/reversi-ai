@@ -19,5 +19,6 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="library" name="game_engine" level="project" />
   </component>
 </module>
