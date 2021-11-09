@@ -25,7 +25,8 @@ public class Main {
         //Create args for engine with some parameters predefined.
         String[] engineArgs = {fpsEvaluationMode, ENGINE_PACKAGE_PATH_OTHELLO_GAME, seed, tableSize,
                 holeGenIterations, ENGINE_MAX_ALLOWED_DECISION_TIMEOUT_MS, ENGINE_PACKAGE_PATH_GREEDY_PLAYER, player};
-        //Start the game.
+        // Start the game.
+        // Due to the engine's workings this does not allow multiple instances to be run.
         Engine.main(engineArgs);
 
     }
