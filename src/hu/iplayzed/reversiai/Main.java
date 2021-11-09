@@ -4,7 +4,6 @@ import game.engine.Engine;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-// TODO: find out why my agent class is not reflected.
 public class Main {
 
     public static final String ENGINE_PACKAGE_PATH_OTHELLO_GAME = "game.oth.OthelloGame";
@@ -31,7 +30,6 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            //testEngine(ENGINE_FPS_EVALUATION_MODE, ENGINE_PACKAGE_PATH_GREEDY_PLAYER, ENGINE_TABLE_SIZE,ENGINE_HOLE_GEN_ITERATIONS);
             testEngine("1", ENGINE_PACKAGE_PATH_GREEDY_PLAYER, ENGINE_TABLE_SIZE,
                     ENGINE_HOLE_GEN_ITERATIONS);
         } catch (Exception e) {
