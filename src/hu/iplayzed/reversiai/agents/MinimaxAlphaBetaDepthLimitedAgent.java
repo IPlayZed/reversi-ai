@@ -11,13 +11,15 @@ import static game.oth.OthelloGame.*;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
+@SuppressWarnings("unused")
 public class MinimaxAlphaBetaDepthLimitedAgent extends OthelloPlayer {
 
     private static final int NO_MORE_CHILDREN = 0;
-    private static final int MAX_DEPTH = 3;
+    private static final int MAX_DEPTH = 6;
     private static final int STARTING_DEPTH = 0;
 
     private final ArrayList<OthelloAction> boardActions = new ArrayList<>();
+    private final ArrayList<OthelloAction> noHoles = new ArrayList<>();
 
     @SuppressWarnings("unused")
     public MinimaxAlphaBetaDepthLimitedAgent(int color, int[][] board, Random random) {
@@ -25,6 +27,7 @@ public class MinimaxAlphaBetaDepthLimitedAgent extends OthelloPlayer {
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[0].length; j++) {
                 boardActions.add(new OthelloAction(i, j));
+                if (board[i][j] == MISSING) noHoles.add(new OthelloAction(i, j));
             }
         }
     }
@@ -59,7 +62,7 @@ public class MinimaxAlphaBetaDepthLimitedAgent extends OthelloPlayer {
     private float minMaxAlphaBetaLimitedPruning(int[][] node, int currentDepth, float alpha, float beta,
                                                 @SuppressWarnings("unused") OthelloAction action, int color) {
         if (currentDepth == MAX_DEPTH || getPossibleActions(node, color).size() == NO_MORE_CHILDREN) {
-            return random.nextInt(); // test if it runs at all
+            return getHeuristicValue(node, action, color); // test if it runs at all
         }
 
         ArrayList<OthelloAction> possibleActions = getPossibleActions(node, color);
@@ -110,8 +113,29 @@ public class MinimaxAlphaBetaDepthLimitedAgent extends OthelloPlayer {
         return possibleActions;
     }
 
-    // TODO
-    private float getHeuristicValue() {
-        return 0;
+    // TODO : Add other heuristic functions as well.
+    private float getHeuristicValue(int[][] node, OthelloAction action, int color) {
+
+        return 80f * getMobilityValue(node);
+    }
+
+    private float getMobilityValue(int[][] node) {
+        int myValidMoves = getValidMoves(node, color);
+        int enemyValidMoves = getValidMoves(node, getEnemyColor());
+        if (myValidMoves == enemyValidMoves) return 0;
+        else {
+            // 100f to optimize for floating point calculations.
+            float result = (100f * myValidMoves) / (myValidMoves + enemyValidMoves);
+            if (myValidMoves < enemyValidMoves) result *= -1;
+            return result;
+        }
+    }
+
+    private int getValidMoves(int[][] board, int color) {
+        int validMoves = 0;
+        for (OthelloAction action : noHoles) {
+            if (isValid(board, action.i, action.j, color)) validMoves++;
+        }
+        return validMoves;
     }
 }
