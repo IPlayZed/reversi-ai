@@ -29,12 +29,11 @@ public class Main {
         // Start the game.
         // Due to the engine's workings this does not allow multiple instances to be run.
         Engine.main(engineArgs);
-
     }
 
     public static void main(String[] args) {
         try {
-            testEngine("1000", AGENT, ENGINE_TABLE_SIZE, ENGINE_HOLE_GEN_ITERATIONS);
+            testEngine("100", AGENT, ENGINE_TABLE_SIZE, ENGINE_HOLE_GEN_ITERATIONS);
         } catch (Exception e) {
             e.printStackTrace();
         }
