@@ -12,12 +12,25 @@ import static game.oth.OthelloGame.*;
 @SuppressWarnings("unused")
 public class MinimaxAlphaBetaDepthLimitedAgent extends OthelloPlayer {
 
+    /**
+     * This is a list of actions, or in other words the places on the gameboard. In some cases it is easier or required
+     * to use this in instead of double-looping through all board indexes.
+     */
     private final ArrayList<OthelloAction> boardActions = new ArrayList<>();
     private static final int MAX_DEPTH = 4;
     private static final int EMPTY = 0;
     private static final int STARTING_DEPTH = 0;
     private long remainingTime = 0;
 
+    /**
+     * The public constructor for the agent.
+     * Besides, calling the super constructor, it also fills up {@link #boardActions}
+     * with indexes.
+     *
+     * @param color  The color of the player Agent.
+     * @param board  The actual gameboard.
+     * @param random A pseudorandom generator required by super.
+     */
     public MinimaxAlphaBetaDepthLimitedAgent(int color, int[][] board, Random random) {
         super(color, board, random);
         for (int i = 0; i < board.length; i++) {
@@ -29,7 +42,6 @@ public class MinimaxAlphaBetaDepthLimitedAgent extends OthelloPlayer {
 
     @Override
     public OthelloAction getAction(OthelloAction prevAction, long[] remainingTimes) {
-        //System.out.println(remainingTimes[this.color] + "---" + remainingTimes[enemyColor()]);
         remainingTime = remainingTimes[color];
         if (prevAction != null) setAction(board, prevAction.i, prevAction.j, 1 - color);
         OthelloAction bestStep = null;
