@@ -8,134 +8,120 @@ import java.util.Random;
 
 import static game.engine.utils.Utils.copy;
 import static game.oth.OthelloGame.*;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
 
 @SuppressWarnings("unused")
 public class MinimaxAlphaBetaDepthLimitedAgent extends OthelloPlayer {
 
-    private static final int NO_MORE_CHILDREN = 0;
-    private static final int MAX_DEPTH = 6;
+    private final ArrayList<OthelloAction> boardActions = new ArrayList<>();
+    private static final int MAX_DEPTH = 4;
+    private static final int EMPTY = 0;
     private static final int STARTING_DEPTH = 0;
 
-    private final ArrayList<OthelloAction> boardActions = new ArrayList<>();
-    private final ArrayList<OthelloAction> noHoles = new ArrayList<>();
-
-    @SuppressWarnings("unused")
     public MinimaxAlphaBetaDepthLimitedAgent(int color, int[][] board, Random random) {
         super(color, board, random);
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[0].length; j++) {
                 boardActions.add(new OthelloAction(i, j));
-                if (board[i][j] == MISSING) noHoles.add(new OthelloAction(i, j));
             }
         }
     }
 
     @Override
     public OthelloAction getAction(OthelloAction prevAction, long[] remainingTimes) {
-        applyPreviousAction(prevAction);
-
-        OthelloAction bestAction = null;
-        float bestHeuristicValue = Integer.MIN_VALUE;
-
-        for (OthelloAction action : boardActions) {
-            if (isValid(board, action.i, action.j, color)) {
-                int[][] childNode = getChildNode(board, action, color);
-                float val = minMaxAlphaBetaLimitedPruning(childNode, STARTING_DEPTH, Integer.MIN_VALUE,
-                        Integer.MAX_VALUE, action, getEnemyColor());
-                if (val > bestHeuristicValue) {
-                    bestAction = action;
-                    bestHeuristicValue = val;
+        if (prevAction != null) setAction(board, prevAction.i, prevAction.j, 1 - color);
+        OthelloAction bestStep = null;
+        float bestActionVal = Integer.MIN_VALUE;
+        float val = 0;
+        for (OthelloAction step : boardActions) {
+            if (isValid(board, step.i, step.j, color)) {
+                int[][] childNode = copy(board);
+                setAction(childNode, step.i, step.j, color);
+                val = MMABDL(childNode, STARTING_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, step, enemyColor());
+                if (val > bestActionVal) {
+                    bestActionVal = val;
+                    bestStep = step;
                 }
             }
         }
-        assert bestAction != null;
-        setAction(board, bestAction.i, bestAction.j, color);
-        return bestAction;
+        assert bestStep != null;
+        setAction(board, bestStep.i, bestStep.j, color);
+        return bestStep;
     }
 
-    private void applyPreviousAction(OthelloAction previousAction) {
-        if (previousAction != null) setAction(board, previousAction.i, previousAction.j, 1 - color);
-    }
+    /***
+     * This function is a modified version of the general minimax algorithm with alpha-beta pruning and depth
+     * limitation. It builds up the game tree during search.
+     *
+     * The heuristic value is calculated based on how high is the mobility after a given step for a given player
+     * (color).
+     * @param node The current node represented by the complete gameboard.
+     * @param depth The current depth of the MMADBL call.
+     * @param alpha The best maximised value so far.
+     * @param beta The best minimised value so far.
+     * @param step A given step on the gameboard.
+     * @param color The given color of the player (encompasses if it is maximising or minimising).
+     * @return The heuristic value of a vertex in the game tree.
+     */
+    float MMABDL(int[][] node, int depth, float alpha, float beta, OthelloAction step, int color) {
 
-    private float minMaxAlphaBetaLimitedPruning(int[][] node, int currentDepth, float alpha, float beta,
-                                                @SuppressWarnings("unused") OthelloAction action, int color) {
-        if (currentDepth == MAX_DEPTH || getPossibleActions(node, color).size() == NO_MORE_CHILDREN) {
-            return getHeuristicValue(node, action, color); // test if it runs at all
+        if (depth == MAX_DEPTH || getSteps(node, color).size() == EMPTY) {
+
+            setAction(node, step.i, step.j, color);
+
+            int myCoins = 0;
+            int enemyCoins = 0;
+
+            for (int i = 0; i < node.length; i++) {
+                for (int j = 0; j < node[i].length; j++) {
+                    if (node[i][j] == this.color) {
+                        myCoins++;
+                    } else if (node[i][j] == enemyColor()) {
+                        enemyCoins++;
+                    }
+                }
+            }
+
+            if (myCoins + enemyCoins == 0) return 0;
+            else {
+                return 100 * (((float) myCoins - enemyCoins) / (myCoins + enemyCoins));
+            }
+
         }
-
-        ArrayList<OthelloAction> possibleActions = getPossibleActions(node, color);
-        if (isMaximizing(color)) {
+        ArrayList<OthelloAction> nextSteps = getSteps(node, color);
+        if (color == this.color) {
             float max = Integer.MIN_VALUE;
-            for (OthelloAction possibleAction : possibleActions) {
-                int[][] childNode = getChildNode(node, possibleAction, color);
-                max = max(max, minMaxAlphaBetaLimitedPruning(childNode, currentDepth + 1, alpha, beta,
-                        possibleAction, getEnemyColor()));
+            for (OthelloAction nextStep : nextSteps) {
+                int[][] childNode = copy(node);
+                setAction(childNode, nextStep.i, nextStep.j, color);
+                max = Math.max(max, MMABDL(childNode, depth + 1, alpha, beta, nextStep, enemyColor()));
                 if (max >= beta) return max;
-                alpha = max(max, alpha);
+                alpha = Math.max(max, alpha);
             }
             return max;
         } else {
             float min = Integer.MAX_VALUE;
-            for (OthelloAction possibleAction : possibleActions) {
-                int[][] childNode = getChildNode(node, possibleAction, color);
-                min = min(min, minMaxAlphaBetaLimitedPruning(childNode, currentDepth + 1, alpha, beta,
-                        possibleAction, this.color));
+            for (OthelloAction nextStep : nextSteps) {
+                int[][] childNode = copy(node);
+                setAction(childNode, nextStep.i, nextStep.j, color);
+                min = Math.min(min, MMABDL(childNode, depth + 1, alpha, beta, nextStep, this.color));
                 if (alpha >= min) return min;
-                beta = min(min, beta);
+                beta = Math.min(min, beta);
             }
             return min;
         }
     }
 
-    private int getEnemyColor() {
-        return color == WHITE ? BLACK : WHITE;
-    }
-
-    private boolean isMaximizing(int color) {
-        return color == this.color;
-    }
-
-    private int[][] getChildNode(int[][] parentNode, OthelloAction possibleAction, int parentColor) {
-        int[][] childNode = copy(parentNode);
-        setAction(childNode, possibleAction.i, possibleAction.j, parentColor);
-        return childNode;
-    }
-
-    private ArrayList<OthelloAction> getPossibleActions(int[][] node, int nodeColor) {
-        ArrayList<OthelloAction> possibleActions = new ArrayList<>();
+    private ArrayList<OthelloAction> getSteps(int[][] node, int color) {
+        ArrayList<OthelloAction> steps = new ArrayList<>();
         for (int i = 0; i < node.length; i++) {
-            for (int j = 0; j < node[0].length; j++) {
-                if (isValid(node, i, j, nodeColor)) possibleActions.add(new OthelloAction(i, j));
+            for (int j = 0; j < node[i].length; j++) {
+                if (isValid(node, i, j, color)) steps.add(new OthelloAction(i, j));
             }
         }
-        return possibleActions;
+        return steps;
     }
 
-    // TODO : Add other heuristic functions as well.
-    private float getHeuristicValue(int[][] node, OthelloAction action, int color) {
-
-        return 80f * getMobilityValue(node);
-    }
-
-    private float getMobilityValue(int[][] node) {
-        int myValidMoves = getValidMoves(node, color);
-        int enemyValidMoves = getValidMoves(node, getEnemyColor());
-        if (myValidMoves == enemyValidMoves) return 0;
-        else {
-            // 100f to optimize for floating point calculations.
-            float result = (100f * myValidMoves) / (myValidMoves + enemyValidMoves);
-            if (myValidMoves < enemyValidMoves) result *= -1;
-            return result;
-        }
-    }
-
-    private int getValidMoves(int[][] board, int color) {
-        int validMoves = 0;
-        for (OthelloAction action : noHoles) {
-            if (isValid(board, action.i, action.j, color)) validMoves++;
-        }
-        return validMoves;
+    private int enemyColor() {
+        return color == WHITE ? BLACK : WHITE;
     }
 }
