@@ -16,6 +16,7 @@ public class MinimaxAlphaBetaDepthLimitedAgent extends OthelloPlayer {
     private static final int MAX_DEPTH = 4;
     private static final int EMPTY = 0;
     private static final int STARTING_DEPTH = 0;
+    private long remainingTime = 0;
 
     public MinimaxAlphaBetaDepthLimitedAgent(int color, int[][] board, Random random) {
         super(color, board, random);
@@ -28,6 +29,8 @@ public class MinimaxAlphaBetaDepthLimitedAgent extends OthelloPlayer {
 
     @Override
     public OthelloAction getAction(OthelloAction prevAction, long[] remainingTimes) {
+        //System.out.println(remainingTimes[this.color] + "---" + remainingTimes[enemyColor()]);
+        remainingTime = remainingTimes[color];
         if (prevAction != null) setAction(board, prevAction.i, prevAction.j, 1 - color);
         OthelloAction bestStep = null;
         float bestActionVal = Integer.MIN_VALUE;
@@ -64,7 +67,7 @@ public class MinimaxAlphaBetaDepthLimitedAgent extends OthelloPlayer {
      */
     float MMABDL(int[][] node, int depth, float alpha, float beta, OthelloAction step, int color) {
 
-        if (depth == MAX_DEPTH || getSteps(node, color).size() == EMPTY) {
+        if (depth >= MAX_DEPTH || remainingTime <= 100000000 || getSteps(node, color).size() == EMPTY) {
 
             setAction(node, step.i, step.j, color);
 
@@ -112,7 +115,7 @@ public class MinimaxAlphaBetaDepthLimitedAgent extends OthelloPlayer {
     }
 
     private ArrayList<OthelloAction> getSteps(int[][] node, int color) {
-        ArrayList<OthelloAction> steps = new ArrayList<>();
+        ArrayList<OthelloAction> steps = new ArrayList<>(boardActions.size());
         for (int i = 0; i < node.length; i++) {
             for (int j = 0; j < node[i].length; j++) {
                 if (isValid(node, i, j, color)) steps.add(new OthelloAction(i, j));
