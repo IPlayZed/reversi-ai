@@ -1,4 +1,4 @@
-package hu.iplayzed.reversiai;
+package hu.iplayzed.reversiai.agents;
 
 import game.oth.OthelloAction;
 import game.oth.OthelloPlayer;

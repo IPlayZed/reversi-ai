@@ -4,7 +4,6 @@ import game.engine.Engine;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-// TODO: find out why my agent class is not reflected.
 public class Main {
 
     public static final String ENGINE_PACKAGE_PATH_OTHELLO_GAME = "game.oth.OthelloGame";
@@ -13,6 +12,9 @@ public class Main {
     public static final String ENGINE_TABLE_SIZE = "10";
     public static final String ENGINE_HOLE_GEN_ITERATIONS = "3";
     public static final String ENGINE_MAX_ALLOWED_DECISION_TIMEOUT_MS = "2000";
+
+    public static final String AGENT = "hu.iplayzed.reversiai.agents.MinimaxAlphaBetaDepthLimitedAgent";
+    public static final String ENEMY = ENGINE_PACKAGE_PATH_GREEDY_PLAYER;
 
     @SuppressWarnings("SameParameterValue")
     private static void testEngine(final String fpsEvaluationMode, final String player, final String tableSize,
@@ -23,17 +25,15 @@ public class Main {
 
         //Create args for engine with some parameters predefined.
         String[] engineArgs = {fpsEvaluationMode, ENGINE_PACKAGE_PATH_OTHELLO_GAME, seed, tableSize,
-                holeGenIterations, ENGINE_MAX_ALLOWED_DECISION_TIMEOUT_MS, ENGINE_PACKAGE_PATH_GREEDY_PLAYER, player};
-        //Start the game.
+                holeGenIterations, ENGINE_MAX_ALLOWED_DECISION_TIMEOUT_MS, ENEMY, player};
+        // Start the game.
+        // Due to the engine's workings this does not allow multiple instances to be run.
         Engine.main(engineArgs);
-
     }
 
     public static void main(String[] args) {
         try {
-            //testEngine(ENGINE_FPS_EVALUATION_MODE, ENGINE_PACKAGE_PATH_GREEDY_PLAYER, ENGINE_TABLE_SIZE,ENGINE_HOLE_GEN_ITERATIONS);
-            testEngine("1", ENGINE_PACKAGE_PATH_GREEDY_PLAYER, ENGINE_TABLE_SIZE,
-                    ENGINE_HOLE_GEN_ITERATIONS);
+            testEngine("100", AGENT, ENGINE_TABLE_SIZE, ENGINE_HOLE_GEN_ITERATIONS);
         } catch (Exception e) {
             e.printStackTrace();
         }
