@@ -4,6 +4,7 @@ import game.oth.OthelloAction;
 import game.oth.OthelloPlayer;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
 
 import static game.engine.utils.Utils.copy;
@@ -40,6 +41,8 @@ public class MinimaxAlphaBetaDepthLimitedAgent extends OthelloPlayer {
      */
     private long remainingTime = 0;
 
+    private final HashSet<OthelloAction> corners = new HashSet<>();
+
     /**
      * The public constructor for the agent.
      * Besides, calling the super constructor, it also fills up {@link #boardActions}
@@ -51,9 +54,39 @@ public class MinimaxAlphaBetaDepthLimitedAgent extends OthelloPlayer {
      */
     public MinimaxAlphaBetaDepthLimitedAgent(int color, int[][] board, Random random) {
         super(color, board, random);
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[0].length; j++) {
-                if (board[i][j] != MISSING) boardActions.add(new OthelloAction(i, j));
+        int boardWidth = board.length;
+        int boardHeight = board[0].length;
+        for (int i = 0; i < boardWidth; i++) {
+            for (int j = 0; j < boardHeight; j++) {
+                OthelloAction action = new OthelloAction(i, j);
+                if (board[i][j] != MISSING) {
+                    boardActions.add(action);
+                    if (i != boardWidth - 1 && i != 0 && j != boardHeight - 1 && j != 0) {
+                        if (board[i - 1][j] == MISSING && board[i][j - 1] == MISSING) {
+                            corners.add(action);
+                        }
+                        if (board[i - 1][j] == MISSING && board[i][j + 1] == MISSING) {
+                            corners.add(action);
+                        }
+                        if (board[i + 1][j] == MISSING && board[i][j - 1] == MISSING) {
+                            corners.add(action);
+                        }
+                        if (board[i + 1][j] == MISSING && board[i][j + 1] == MISSING) {
+                            corners.add(action);
+                        }
+                    }
+                    if ((i == 0 && j == 0) || (i == 0 && j == boardHeight - 1) || (i == boardWidth - 1 && j == 0) ||
+                            (i == boardWidth - 1 && j == boardHeight - 1)) corners.add(action);
+                    if ((i == 0 || i == boardWidth - 1) && j - 1 >= 0 && board[i][j - 1] == MISSING)
+                        corners.add(action);
+                    if ((i == 0 || i == boardWidth - 1) && j + 1 <= boardHeight - 1 && board[i][j + 1] == MISSING)
+                        corners.add(action);
+                    if ((j == 0 || j == boardHeight - 1) && i - 1 >= 0 && board[i - 1][j] == MISSING)
+                        corners.add(action);
+                    if ((j == 0 || j == boardHeight - 1) && i + 1 <= boardWidth - 1 && board[i + 1][j] == MISSING)
+                        corners.add(action);
+                }
+
             }
         }
     }
@@ -73,6 +106,8 @@ public class MinimaxAlphaBetaDepthLimitedAgent extends OthelloPlayer {
         OthelloAction bestStep = null;
         float bestActionVal = Integer.MIN_VALUE;
         float val;
+        int i;
+        int j;
         for (OthelloAction step : boardActions) {
             if (isValid(board, step.i, step.j, color)) {
                 int[][] childNode = copy(board);
@@ -115,17 +150,38 @@ public class MinimaxAlphaBetaDepthLimitedAgent extends OthelloPlayer {
 
             int myCoins = 0;
             int enemyCoins = 0;
+            int myCorners = 0;
+            int enemyCorners = 0;
+            int myFreeTiles = 0;
+            int enemyFreeTiles = 0;
+            int i, j;
+
             for (OthelloAction action : boardActions) {
-                if (node[action.i][action.j] == this.color) myCoins++;
-                else if (node[action.i][action.j] == enemyColor) enemyCoins++;
+                i = action.i;
+                j = action.j;
+                if (node[i][j] == this.color) {
+                    myCoins++;
+                    if (corners.contains(action)) myCorners++;
+                    if (isValid(node, i, j, this.color)) myFreeTiles++;
+                } else if (node[i][j] == enemyColor) {
+                    enemyCoins++;
+                    if (corners.contains(action)) enemyCorners++;
+                    if (isValid(node, i, j, enemyColor)) enemyFreeTiles++;
+                }
             }
 
-            if (myCoins + enemyCoins == 0) return 0;
-            else {
-                return 100 * (((float) myCoins - enemyCoins) / (myCoins + enemyCoins));
-            }
-
+            float parity = 0;
+            if (myCoins + enemyCoins != 0) parity = 10 * (((float) myCoins - enemyCoins) / (myCoins + enemyCoins));
+            float mobility = 0;
+            if (myFreeTiles + enemyFreeTiles != 0)
+                mobility = 50 * (((float) myFreeTiles - enemyFreeTiles) / (myFreeTiles + enemyFreeTiles));
+            float corner = 0;
+            if (myCorners + enemyCorners != 0)
+                corner = 100 * (((float) myCorners - enemyCorners) / (myCorners + enemyCorners));
+            return parity + mobility + corner;
         }
+
+
         ArrayList<OthelloAction> nextSteps = getSteps(node, color);
         if (color == this.color) {
             float max = Integer.MIN_VALUE;
